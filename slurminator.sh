@@ -13,6 +13,7 @@ function slurminator {
         case $whattodo in
             "s)")
                 echo "slurmlogpath $chosenjob"
+                slurmlogpath $chosenjob
             ;;
             "f)")
                 echo "tail -f $(slurmlogpath $chosenjob)"
