@@ -15,13 +15,13 @@ function slurminator {
         if command -v whiptail &> /dev/null; then
             JOBS=$(for line in $(squeue -u $USER --format "'%A' '%j (%t, %M)'" | sed '1d'); do echo "$line" | tr '\n' ' '; done)
             chosenjob=$(
-                eval "whiptail --title 'Slurminator' --menu 'Test' 16 100 9 $JOBS 'q)' 'quit program'" 3>&2 2>&1 1>&3
+                eval "whiptail --title 'Slurminator' --menu 'Test' 16 100 9 $JOBS 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3
             )
 
             if [[ $chosenjob == 'q)' ]]; then
                 green_text "Ok"
             else
-                whattodo=$(eval "whiptail --title 'Slurminator $chosenjob' --menu 'Test' 16 100 9 's)' 'Show log path' 'w)' 'whypending' 'f)' 'tail -f' 'c)' 'scancel' 'sc)' 'scancel with signal USR1' 'q)' 'quit program'" 3>&2 2>&1 1>&3)
+                whattodo=$(eval "whiptail --title 'Slurminator $chosenjob' --menu 'Test' 16 100 9 's)' 'Show log path' 'w)' 'whypending' 'f)' 'tail -f' 'c)' 'scancel' 'sc)' 'scancel with signal USR1' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3)
                 case $whattodo in
                     "s)")
                         echo "slurmlogpath $chosenjob"
