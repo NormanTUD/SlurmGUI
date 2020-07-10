@@ -21,7 +21,7 @@ function slurminator {
             if [[ $chosenjob == 'q)' ]]; then
                 green_text "Ok"
             else
-                whattodo=$(eval "whiptail --title 'Slurminator $chosenjob' --menu 'Test' 16 100 9 's)' 'Show log path' 'w)' 'whypending' 'f)' 'tail -f' 'c)' 'scancel' 'sc)' 'scancel with signal USR1' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3)
+                whattodo=$(eval "whiptail --title 'Slurminator $chosenjob' --menu 'Test' 16 100 9 's)' 'Show log path' 'w)' 'whypending' 'f)' 'tail -f' 'c)' 'scancel' 'sc)' 'scancel with signal USR1' 'm)' 'go to main menu' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3)
                 case $whattodo in
                     "s)")
                         echo "slurmlogpath $chosenjob"
@@ -40,6 +40,9 @@ function slurminator {
                             echo "scancel $chosenjob"
                             scancel $chosenjob && green_text "$chosenjob killed" || red_text "Error killing $chosenjob"
                         fi
+                    ;;
+                    "m)")
+			slurminator
                     ;;
                     "sc)")
                         if (whiptail --title "Really kill $chosenjob" --yesno "Are you sure you want to kill $chosenjob with USR1?" 8 78); then
