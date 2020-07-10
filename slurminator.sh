@@ -10,24 +10,17 @@ function green_text {
     echo -e "\e[92m$1\e[0m"
 }
 
-function two_slurm_tails {
-    THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
-    filea=$(slurmlogpath $1)
-    fileb=$(slurmlogpath $2)
-    if [[ -e $filea ]]; then
-	    if [[ -e $fileb ]]; then
-		    echo "screen tail -f $filea
-		    split -v
-		    focus right
-		    screen tail -f $fileb" > $THISSCREENCONFIGFILE
-		    screen -c $THISSCREENCONFIGFILE
-		    rm $THISSCREENCONFIGFILE
-	    else
-		red_text "$fileb does not exist"
-	    fi
-    else
-	red_text "$filea does not exist"
-    fi
+function multiple_slurm_tails {
+	THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
+	for var in "$@"; do
+		echo "screen tail -f $(slurmlogpath $var)" >> $THISSCREENCONFIGFILE
+		if [[ ${*: -1:1} -ne $var ]]; then
+			echo "split -v
+focus right" >> $THISSCREENCONFIGFILE
+		fi
+	done
+	screen -c $THISSCREENCONFIGFILE
+	rm $THISSCREENCONFIGFILE
 }
 
 function slurminator {
@@ -35,7 +28,7 @@ function slurminator {
         if command -v whiptail &> /dev/null; then
             JOBS=$(for line in $(squeue -u $USER --format "'%A' '%j (%t, %M)'" | sed '1d'); do echo "$line" | tr '\n' ' '; done)
             chosenjob=$(
-		    eval "whiptail --title 'Slurminator' --menu 'Test' 16 100 9 $JOBS 'r)' 'reload slurminator' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3
+		    eval "whiptail --title 'Slurminator' --menu 'Test' 16 100 9 $JOBS 't)' 'tail multiple jobs' 'r)' 'reload slurminator' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3
             )
 
             if [[ $chosenjob == 'q)' ]]; then
@@ -43,6 +36,11 @@ function slurminator {
             else
 		if [[ $chosenjob == 'r)' ]]; then
 			slurminator
+		elif [[ $chosenjob == 't)' ]]; then
+			TJOBS=$(for line in $(squeue -u $USER --format "'%A' '%j (%t, %M)' OFF" | sed '1d'); do echo "$line" | tr '\n' ' '; done)
+			echo "whiptail --title 'Which jobs?' --checklist 'Which jobs to choose?' 20 78 4 $TJOBS"
+			test=$(eval "whiptail --title 'Which jobs?' --checklist 'Which jobs to choose?' 20 78 4 $TJOBS" 3>&1 1>&2 2>&3)
+			eval "multiple_slurm_tails $test"
 		else
 			whattodo=$(eval "whiptail --title 'Slurminator $chosenjob' --menu 'Test' 16 100 9 's)' 'Show log path' 'w)' 'whypending' 'f)' 'tail -f' 'c)' 'scancel' 'sc)' 'scancel with signal USR1' 'm)' 'go to main menu' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3)
 			case $whattodo in
