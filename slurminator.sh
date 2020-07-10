@@ -10,6 +10,25 @@ function green_text {
     echo -e "\e[92m$1\e[0m"
 }
 
+function two_slurm_tails {
+    THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
+    filea=$(slurmlogpath $1)
+    fileb=$(slurmlogpath $2)
+    if [[ -e $filea ]]; then
+	    if [[ -e $fileb ]]; then
+		    echo "screen tail -f $filea
+		    split -v
+		    focus right
+		    screen tail -f $fileb" > $THISSCREENCONFIGFILE
+		    screen -c $THISSCREENCONFIGFILE
+	    else
+		red_text "$fileb does not exist"
+	    fi
+    else
+	red_text "$filea does not exist"
+    fi
+}
+
 function slurminator {
     if command -v squeue &> /dev/null; then
         if command -v whiptail &> /dev/null; then
