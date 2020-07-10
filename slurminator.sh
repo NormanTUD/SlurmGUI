@@ -3,13 +3,13 @@
 function slurminator {
     JOBS=$(for line in $(squeue -u $USER --format "'%A'-'%j (%t)'" | egrep -v "JOBID|NAME"); do echo "$line" | sed -e "s/'-'/' '/" | tr '\n' ' '; done)
     chosenjob=$(
-        eval "whiptail --title 'Slurminator' --menu 'Test' 16 100 9 $JOBS 'e)' 'Programm beenden'" 3>&2 2>&1 1>&3
+        eval "whiptail --title 'Slurminator' --menu 'Test' 16 100 9 $JOBS 'e)' 'Exit program'" 3>&2 2>&1 1>&3
     )
 
     if [[ $chosenjob == 'e)' ]]; then
         echo "Ok"
     else
-        whattodo=$(eval "whiptail --title 'Slurminator $chosenjob' --menu 'Test' 16 100 9 's)' 'Show log path' 'f)' 'ftails' 'c)' 'scancel' 'sc)' 'secure cancel (USR1)' 'e)' 'Programm beenden'" 3>&2 2>&1 1>&3)
+        whattodo=$(eval "whiptail --title 'Slurminator $chosenjob' --menu 'Test' 16 100 9 's)' 'Show log path' 'f)' 'ftails' 'c)' 'scancel' 'sc)' 'secure cancel (USR1)' 'e)' 'Exit program'" 3>&2 2>&1 1>&3)
         case $whattodo in
             "s)")
                 echo "slurmlogpath $chosenjob"
