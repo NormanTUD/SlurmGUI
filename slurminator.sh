@@ -38,8 +38,9 @@ function slurminator {
 			slurminator
 		elif [[ $chosenjob == 't)' ]]; then
 			TJOBS=$(for line in $(squeue -u $USER --format "'%A' '%j (%t, %M)' OFF" | sed '1d'); do echo "$line" | tr '\n' ' '; done)
-			echo "whiptail --title 'Which jobs?' --checklist 'Which jobs to choose?' 20 78 4 $TJOBS"
+			echo "whiptail --title 'Which jobs?' --checklist 'Which jobs to choose?' 20 78 10 $TJOBS"
 			test=$(eval "whiptail --title 'Which jobs?' --checklist 'Which jobs to choose?' 20 78 4 $TJOBS" 3>&1 1>&2 2>&3)
+			whiptail --title "Screens" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78
 			eval "multiple_slurm_tails $test"
 		else
 			whattodo=$(eval "whiptail --title 'Slurminator $chosenjob' --menu 'Test' 16 100 9 's)' 'Show log path' 'w)' 'whypending' 'f)' 'tail -f' 'c)' 'scancel' 'sc)' 'scancel with signal USR1' 'm)' 'go to main menu' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3)
