@@ -1,5 +1,7 @@
 #!/bin/bash
 
+function slurmlogpath { scontrol show job $1 | grep StdOut | sed -e 's/^\s*StdOut=//' }
+
 function slurminator {
     JOBS=$(for line in $(squeue -u $USER --format "'%A'-'%j (%t)'" | egrep -v "JOBID|NAME"); do echo "$line" | sed -e "s/'-'/' '/" | tr '\n' ' '; done)
     chosenjob=$(
