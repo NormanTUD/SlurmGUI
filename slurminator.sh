@@ -21,6 +21,7 @@ function two_slurm_tails {
 		    focus right
 		    screen tail -f $fileb" > $THISSCREENCONFIGFILE
 		    screen -c $THISSCREENCONFIGFILE
+		    rm $THISSCREENCONFIGFILE
 	    else
 		red_text "$fileb does not exist"
 	    fi
