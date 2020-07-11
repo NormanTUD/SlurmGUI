@@ -1,6 +1,8 @@
 #!/bin/bash
 
-function slurmlogpath { scontrol show job $1 | grep StdOut | sed -e 's/^\s*StdOut=//' }
+function slurmlogpath {
+	scontrol show job $1 | grep StdOut | sed -e 's/^\s*StdOut=//'
+}
 
 function red_text {
     echo -e "\e[31m$1\e[0m"
