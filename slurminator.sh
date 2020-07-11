@@ -234,18 +234,19 @@ function show_accounting_data {
 		whiptailoptions="'t)' 'Show accounting data as tree' 'o)' 'Show top user accounting' 'm)' 'Show top user accounting for this month'"
 		WIDTHHEIGHT="$LINES $COLUMNS $(( $LINES - 8 ))"
 		whattodo=$(eval "whiptail --title 'Accounting data' --menu 'Show accounting information' $WIDTHHEIGHT $whiptailoptions" 3>&2 2>&1 1>&3)
+		NUMBEROFLINES=$(( $LINES - 5 ))
 		case $whattodo in
 			"t)")
 				debug_code "sreport cluster AccountUtilizationByUser tree"
 				sreport cluster AccountUtilizationByUser tree
 				;;
 			"o)")
-				debug_code "sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu"
-				sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu
+				debug_code "sreport user top start=0101 end=0201 TopCount=$NUMBEROFLINES -t hourper --tres=cpu,gpu"
+				sreport user top start=0101 end=0201 TopCount=$NUMBEROFLINES -t hourper --tres=cpu,gpu
 				;;
 			"m)")
-				debug_code "sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu Start=`date -d "last month" +%D` End=`date -d "this month" +%D`"
-				sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu Start=`date -d "last month" +%D` End=`date -d "this month" +%D`
+				debug_code "sreport user top start=0101 end=0201 TopCount=$NUMBEROFLINES -t hourper --tres=cpu,gpu Start=`date -d "last month" +%D` End=`date -d "this month" +%D`"
+				sreport user top start=0101 end=0201 TopCount=$NUMBEROFLINES -t hourper --tres=cpu,gpu Start=`date -d "last month" +%D` End=`date -d "this month" +%D`
 				;;
 		esac
 	else
