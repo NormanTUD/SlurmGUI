@@ -1,5 +1,21 @@
 #!/bin/bash
 
+echoerr() {
+	echo "$@" 1>&2
+}
+
+function red_text {
+	echoerr -e "\e[31m$1\e[0m"
+}
+
+function green_text {
+	echoerr -e "\e[92m$1\e[0m"
+}
+
+function debug_code {
+	echoerr -e "\e[93m$1\e[0m"
+}
+
 function slurmlogpath {
 	if command -v scontrol &> /dev/null; then
 		if command -v grep &> /dev/null; then
@@ -15,22 +31,6 @@ function slurmlogpath {
 	else
 		red_text "scontrol not found"
 	fi
-}
-
-echoerr() {
-	echo "$@" 1>&2
-}
-
-function red_text {
-	echoerr -e "\e[31m$1\e[0m"
-}
-
-function green_text {
-	echoerr -e "\e[92m$1\e[0m"
-}
-
-function debug_code {
-	echoerr -e "\e[93m$1\e[0m"
 }
 
 function get_job_name {
