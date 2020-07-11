@@ -43,24 +43,30 @@ function get_job_name {
 
 function multiple_slurm_tails {
 	if command -v screen &> /dev/null; then
-		THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
-		for slurmid in "$@"; do
-			logfile=$(slurmlogpath $slurmid)
-			if [[ -e $logfile ]]; then
-				echo "screen tail -f $logfile" >> $THISSCREENCONFIGFILE
-				echo "name $(get_job_name $slurmid)" >> $THISSCREENCONFIGFILE
-				if [[ ${*: -1:1} -ne $slurmid ]]; then
-					echo "split -v" >> $THISSCREENCONFIGFILE
-					echo "focus right" >> $THISSCREENCONFIGFILE
+		if command -v uuidgen &> /dev/null; then
+			THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
+			for slurmid in "$@"; do
+				logfile=$(slurmlogpath $slurmid)
+				if [[ -e $logfile ]]; then
+					echo "screen tail -f $logfile" >> $THISSCREENCONFIGFILE
+					echo "name $(get_job_name $slurmid)" >> $THISSCREENCONFIGFILE
+					if [[ ${*: -1:1} -ne $slurmid ]]; then
+						echo "split -v" >> $THISSCREENCONFIGFILE
+						echo "focus right" >> $THISSCREENCONFIGFILE
+					fi
 				fi
+			done
+			if [[ -e $THISSCREENCONFIGFILE ]]; then
+				debug_code "Screen file:"
+				cat $THISSCREENCONFIGFILE
+				screen -c $THISSCREENCONFIGFILE
+				rm $THISSCREENCONFIGFILE
+			else
+				red_text "$THISSCREENCONFIGFILE not found"
 			fi
-		done
-		debug_code "Screen file:"
-		for line in $(cat $THISSCREENCONFIGFILE); do 
-			debug_code $line
-		done
-		screen -c $THISSCREENCONFIGFILE
-		rm $THISSCREENCONFIGFILE
+		else
+			red_text "Command uuidgen not found, cannot execute multiple tails"
+		fi
 	else
 		red_text "Command screen not found, cannot execute multiple tails"
 	fi
