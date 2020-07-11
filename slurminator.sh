@@ -21,21 +21,29 @@ function debug_code {
 }
 
 function multiple_slurm_tails {
-	THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
-	for var in "$@"; do
-		echo "screen tail -f $(slurmlogpath $var)" >> $THISSCREENCONFIGFILE
-		echo "name $var" >> $THISSCREENCONFIGFILE
-		if [[ ${*: -1:1} -ne $var ]]; then
-			echo "split -v" >> $THISSCREENCONFIGFILE
-			echo "focus right" >> $THISSCREENCONFIGFILE
-		fi
-	done
-	screen -c $THISSCREENCONFIGFILE
-	rm $THISSCREENCONFIGFILE
+	if command -v screen &> /dev/null; then
+		THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
+		for var in "$@"; do
+			echo "screen tail -f $(slurmlogpath $var)" >> $THISSCREENCONFIGFILE
+			echo "name $var" >> $THISSCREENCONFIGFILE
+			if [[ ${*: -1:1} -ne $var ]]; then
+				echo "split -v" >> $THISSCREENCONFIGFILE
+				echo "focus right" >> $THISSCREENCONFIGFILE
+			fi
+		done
+		screen -c $THISSCREENCONFIGFILE
+		rm $THISSCREENCONFIGFILE
+	else
+		red_text "Command screen not found, cannot execute multiple tails"
+	fi
 }
 
 function get_job_name {
-	scontrol show job $1 | grep JobName | sed -e 's/.*JobName=//'
+	if command -v screen &> /dev/null; then
+		scontrol show job $1 | grep JobName | sed -e 's/.*JobName=//'
+	else
+		red_text "Program scontrol does not exist, cannot run it"
+	fi
 }
 
 function kill_multiple_jobs {
@@ -64,6 +72,17 @@ function tail_multiple_jobs {
 
 function single_job_tasks {
 	chosenjob=$1
+
+	if ! command -v scontrol &> /dev/null; then
+		red_text "scontrol not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v tail &> /dev/null; then
+		red_text "tail not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
 	WHYPENDINGSTRING=""
 	if command -v whypending &> /dev/null; then
 		WHYPENDINGSTRING="'w)' 'whypending'"
@@ -141,6 +160,11 @@ function slurminator {
 
 	if ! command -v whiptail &> /dev/null; then
 		red_text "whiptail not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v scontrol &> /dev/null; then
+		red_text "scontrol not found. Cannot execute slurminator without it"
 		FAILED=1
 	fi
 
