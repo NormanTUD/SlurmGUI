@@ -230,7 +230,7 @@ function show_accounting_data {
 				debug_code "sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu"
 				sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu
 				;;
-			"o)")
+			"m)")
 				debug_code "sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu Start=`date -d "last month" +%D` End=`date -d "this month" +%D`"
 				sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu Start=`date -d "last month" +%D` End=`date -d "this month" +%D`
 				;;
