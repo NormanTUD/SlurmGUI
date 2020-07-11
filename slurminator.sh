@@ -46,6 +46,7 @@ function kill_multiple_jobs {
 function tail_multiple_jobs {
 	TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
 	chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
+	chosenjobs=""
 	whiptail --title "Tail for multiple jobs with screen" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
 	if [[ $chosenjobs -eq "" ]]; then
 		green_text "No jobs chosen to tail"
@@ -111,9 +112,16 @@ function single_job_tasks {
 }
 
 function get_squeue_from_format_string {
-	for line in $(squeue -u $USER --format "$1" | sed '1d'); do 
-		echo "$line" | tr '\n' ' '; 
-	done
+	if ! command -v squeue &> /dev/null; then
+		red_text "squeue not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if [[ $FAILED == 0 ]]; then
+		for line in $(squeue -u $USER --format "$1" | sed '1d'); do 
+			echo "$line" | tr '\n' ' '; 
+		done
+	fi
 }
 
 function slurminator {
