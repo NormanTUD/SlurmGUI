@@ -45,15 +45,20 @@ function multiple_slurm_tails {
 	if command -v screen &> /dev/null; then
 		THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
 		for slurmid in "$@"; do
-			echo "screen tail -f $(slurmlogpath $slurmid)" >> $THISSCREENCONFIGFILE
-			echo "name $(get_job_name $slurmid)" >> $THISSCREENCONFIGFILE
-			if [[ ${*: -1:1} -ne $slurmid ]]; then
-				echo "split -v" >> $THISSCREENCONFIGFILE
-				echo "focus right" >> $THISSCREENCONFIGFILE
+			logfile=$(slurmlogpath $slurmid)
+			if [[ -e $logfile ]]; then
+				echo "screen tail -f $logfile" >> $THISSCREENCONFIGFILE
+				echo "name $(get_job_name $slurmid)" >> $THISSCREENCONFIGFILE
+				if [[ ${*: -1:1} -ne $slurmid ]]; then
+					echo "split -v" >> $THISSCREENCONFIGFILE
+					echo "focus right" >> $THISSCREENCONFIGFILE
+				fi
 			fi
 		done
 		debug_code "Screen file:"
-		debug_code $(cat $THISSCREENCONFIGFILE)
+		for line in $(cat $THISSCREENCONFIGFILE); do 
+			debug_code $line
+		done
 		screen -c $THISSCREENCONFIGFILE
 		rm $THISSCREENCONFIGFILE
 	else
