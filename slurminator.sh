@@ -42,7 +42,7 @@ function kill_multiple_jobs {
 function tail_multiple_jobs {
 	TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
 	test=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
-	whiptail --title "Screens" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
+	whiptail --title "Tail for multiple jobs with screen" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
 	eval "multiple_slurm_tails $test"
 }
 
@@ -61,6 +61,8 @@ function single_job_tasks {
 	TAILSTRING=""
 	if command -v tail &> /dev/null; then
 		TAILSTRING="'t)' 'tail -f'"
+	else
+		red_text "Tail does not seem to be installed, not showing 'tail -f' option"
 	fi
 
 	jobname=$(get_job_name $chosenjob)
@@ -126,7 +128,13 @@ function slurminator {
 
 	TAILSTRING=""
 	if command -v tail &> /dev/null; then
-		TAILSTRING="'t)' 'tail multiple jobs'"
+		if command -v screen &> /dev/null; then
+			TAILSTRING="'t)' 'tail multiple jobs'"
+		else
+			red_text "Screen could not be found, not showing 'tail multiple jobs' option"
+		fi
+	else
+		red_text "Tail does not seem to be installed, not showing 'tail multiple jobs'"
 	fi
 	
 
