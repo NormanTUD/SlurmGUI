@@ -33,29 +33,31 @@ function debug_code {
 	echoerr -e "\e[93m$1\e[0m"
 }
 
-function multiple_slurm_tails {
-	if command -v screen &> /dev/null; then
-		THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
-		for var in "$@"; do
-			echo "screen tail -f $(slurmlogpath $var)" >> $THISSCREENCONFIGFILE
-			echo "name $var" >> $THISSCREENCONFIGFILE
-			if [[ ${*: -1:1} -ne $var ]]; then
-				echo "split -v" >> $THISSCREENCONFIGFILE
-				echo "focus right" >> $THISSCREENCONFIGFILE
-			fi
-		done
-		screen -c $THISSCREENCONFIGFILE
-		rm $THISSCREENCONFIGFILE
-	else
-		red_text "Command screen not found, cannot execute multiple tails"
-	fi
-}
-
 function get_job_name {
 	if command -v screen &> /dev/null; then
 		scontrol show job $1 | grep JobName | sed -e 's/.*JobName=//'
 	else
 		red_text "Program scontrol does not exist, cannot run it"
+	fi
+}
+
+function multiple_slurm_tails {
+	if command -v screen &> /dev/null; then
+		THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
+		for slurmid in "$@"; do
+			echo "screen tail -f $(slurmlogpath $slurmid)" >> $THISSCREENCONFIGFILE
+			echo "name $(get_job_name $slurmid)" >> $THISSCREENCONFIGFILE
+			if [[ ${*: -1:1} -ne $slurmid ]]; then
+				echo "split -v" >> $THISSCREENCONFIGFILE
+				echo "focus right" >> $THISSCREENCONFIGFILE
+			fi
+		done
+		debug_code "Screen file:"
+		debug_code $(cat $THISSCREENCONFIGFILE)
+		screen -c $THISSCREENCONFIGFILE
+		rm $THISSCREENCONFIGFILE
+	else
+		red_text "Command screen not found, cannot execute multiple tails"
 	fi
 }
 
@@ -146,7 +148,6 @@ function single_job_tasks {
 	if command -v scancel &> /dev/null; then
 		SCANCELSTRING="'k)' 'scancel' 'c)' 'scancel with signal USR1'"
 	fi
-
 
 	TAILSTRING=""
 	if command -v tail &> /dev/null; then
