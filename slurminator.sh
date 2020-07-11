@@ -1,7 +1,20 @@
 #!/bin/bash
 
 function slurmlogpath {
-	scontrol show job $1 | grep StdOut | sed -e 's/^\s*StdOut=//'
+	if command -v scontrol &> /dev/null; then
+		if command -v grep &> /dev/null; then
+			if command -v sed &> /dev/null; then
+				debug_code "scontrol show job $1 | grep StdOut | sed -e 's/^\\s*StdOut=//'"
+				scontrol show job $1 | grep StdOut | sed -e 's/^\s*StdOut=//'
+			else
+				red_text "sed not found"
+			fi
+		else
+			red_text "grep not found"
+		fi
+	else
+		red_text "scontrol not found"
+	fi
 }
 
 echoerr() {
@@ -47,26 +60,67 @@ function get_job_name {
 }
 
 function kill_multiple_jobs {
-	TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
-	chosenjobs=$(eval "whiptail --title 'Which jobs to kill?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
-	if [[ -z $chosenjobs ]]; then
-		green_text "No jobs chosen to kill"
-	else
-		if (whiptail --title "Really kill multiple jobs ($chosenjobs)?" --yesno "Are you sure you want to kill multiple jobs ($chosenjobs)?" 8 78); then
-			debug_code "scancel $chosenjobs"
-			eval "scancel $chosenjobs"
+	FAILED=0
+	if ! command -v squeue &> /dev/null; then
+		red_text "squeue not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v scancel &> /dev/null; then
+		red_text "scancel not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v whiptail &> /dev/null; then
+		red_text "whiptail not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if [[ $FAILED == 0 ]]; then
+		TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
+		chosenjobs=$(eval "whiptail --title 'Which jobs to kill?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
+		if [[ -z $chosenjobs ]]; then
+			green_text "No jobs chosen to kill"
+		else
+			if (whiptail --title "Really kill multiple jobs ($chosenjobs)?" --yesno "Are you sure you want to kill multiple jobs ($chosenjobs)?" 8 78); then
+				debug_code "scancel $chosenjobs"
+				eval "scancel $chosenjobs"
+			fi
 		fi
 	fi
 }
 
 function tail_multiple_jobs {
-	TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
-	chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
-	whiptail --title "Tail for multiple jobs with screen" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
-	if [[ -z $chosenjobs ]]; then
-		green_text "No jobs chosen to tail"
-	else
-		eval "multiple_slurm_tails $chosenjobs"
+	FAILED=0
+	if ! command -v squeue &> /dev/null; then
+		red_text "squeue not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v tail &> /dev/null; then
+		red_text "tail not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v whiptail &> /dev/null; then
+		red_text "whiptail not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v screen &> /dev/null; then
+		red_text "screen not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if [[ $FAILED == 0 ]]; then
+		TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
+		chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
+		whiptail --title "Tail for multiple jobs with screen" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
+		if [[ -z $chosenjobs ]]; then
+			green_text "No jobs chosen to tail"
+		else
+			eval "multiple_slurm_tails $chosenjobs"
+		fi
 	fi
 }
 
@@ -151,7 +205,6 @@ function get_squeue_from_format_string {
 }
 
 function slurminator {
-	WIDTHHEIGHT="$LINES $COLUMNS $(( $LINES - 8 ))"
 	FAILED=0
 	if ! command -v squeue &> /dev/null; then
 		red_text "squeue not found. Cannot execute slurminator without it"
@@ -186,6 +239,7 @@ function slurminator {
 	
 
 	if [[ $FAILED == 0 ]]; then
+		WIDTHHEIGHT="$LINES $COLUMNS $(( $LINES - 8 ))"
 		JOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)'")
 		chosenjob=$(
 			eval "whiptail --title 'Slurminator' --menu 'Welcome to Slurminator' $WIDTHHEIGHT $JOBS $SCANCELSTRING $TAILSTRING 'r)' 'reload slurminator' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3
