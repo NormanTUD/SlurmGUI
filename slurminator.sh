@@ -147,6 +147,7 @@ function single_job_tasks {
 		SCANCELSTRING="'k)' 'scancel' 'c)' 'scancel with signal USR1'"
 	fi
 
+
 	TAILSTRING=""
 	if command -v tail &> /dev/null; then
 		TAILSTRING="'t)' 'tail -f'"
@@ -204,6 +205,41 @@ function get_squeue_from_format_string {
 	fi
 }
 
+function show_accounting_data {
+	FAILED=0
+	if ! command -v sreport &> /dev/null; then
+		red_text "sreport not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v whiptail &> /dev/null; then
+		red_text "whiptail not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if [[ $FAILED == 0 ]]; then
+		whiptailoptions="'t)' 'Show accounting data as tree' 'o)' 'Show top user accounting' 'm)' 'Show top user accounting for this month'"
+		WIDTHHEIGHT="$LINES $COLUMNS $(( $LINES - 8 ))"
+		whattodo=$(eval "whiptail --title 'Accounting data' --menu 'Show accounting information' $WIDTHHEIGHT $whiptailoptions" 3>&2 2>&1 1>&3)
+		case $whattodo in
+			"t)")
+				debug_code "sreport cluster AccountUtilizationByUser tree"
+				sreport cluster AccountUtilizationByUser tree
+				;;
+			"o)")
+				debug_code "sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu"
+				sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu
+				;;
+			"o)")
+				debug_code "sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu Start=`date -d "last month" +%D` End=`date -d "this month" +%D`"
+				sreport user top start=0101 end=0201 TopCount=50 -t hourper --tres=cpu,gpu Start=`date -d "last month" +%D` End=`date -d "this month" +%D`
+				;;
+		esac
+	else
+		red_text "Missing requirements, cannot run show_accounting_data"
+	fi
+}
+
 function slurminator {
 	FAILED=0
 	if ! command -v squeue &> /dev/null; then
@@ -226,6 +262,11 @@ function slurminator {
 		SCANCELSTRING="'k)' 'kill multiple jobs'"
 	fi
 
+	ACCOUNTINGSTRING=""
+	if command -v sreport &> /dev/null; then
+		ACCOUNTINGSTRING="'a)' 'Show accounting data'"
+	fi
+
 	TAILSTRING=""
 	if command -v tail &> /dev/null; then
 		if command -v screen &> /dev/null; then
@@ -242,7 +283,7 @@ function slurminator {
 		WIDTHHEIGHT="$LINES $COLUMNS $(( $LINES - 8 ))"
 		JOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)'")
 		chosenjob=$(
-			eval "whiptail --title 'Slurminator' --menu 'Welcome to Slurminator' $WIDTHHEIGHT $JOBS $SCANCELSTRING $TAILSTRING 'r)' 'reload slurminator' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3
+			eval "whiptail --title 'Slurminator' --menu 'Welcome to Slurminator' $WIDTHHEIGHT $JOBS $SCANCELSTRING $TAILSTRING $ACCOUNTINGSTRING 'r)' 'reload slurminator' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3
 		)
 
 		if [[ $chosenjob == 'q)' ]]; then
@@ -253,6 +294,8 @@ function slurminator {
 			tail_multiple_jobs
 		elif [[ $chosenjob == 'k)' ]]; then
 			kill_multiple_jobs
+		elif [[ $chosenjob == 'a)' ]]; then
+			show_accounting_data
 		else
 			single_job_tasks $chosenjob
 		fi
