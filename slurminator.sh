@@ -33,7 +33,7 @@ function debug_code {
 	echoerr -e "\e[93m$1\e[0m"
 }
 
-function multiple_command_windows {
+function multiple_slurm_tails {
 	if command -v screen &> /dev/null; then
 		THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
 		for var in "$@"; do
@@ -113,13 +113,13 @@ function tail_multiple_jobs {
 	fi
 
 	if [[ $FAILED == 0 ]]; then
-		TJOBS=$(get_squeue_from_format_string "'tail -f %A' '%j (%t, %M)' OFF")
+		TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
 		chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
 		whiptail --title "Tail for multiple jobs with screen" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
 		if [[ -z $chosenjobs ]]; then
 			green_text "No jobs chosen to tail"
 		else
-			eval "multiple_command_windows $chosenjobs"
+			eval "multiple_slurm_tails $chosenjobs"
 		fi
 	fi
 }
