@@ -31,7 +31,7 @@ function get_job_name {
 }
 
 function kill_multiple_jobs {
-	TJOBS=$(for line in $(squeue -u $USER --format "'%A' '%j (%t, %M)' OFF" | sed '1d'); do echo "$line" | tr '\n' ' '; done)
+	TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
 	chosenjobs=$(eval "whiptail --title 'Which jobs to kill?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
 	if (whiptail --title "Really kill multiple jobs ($chosenjobs)?" --yesno "Are you sure you want to kill multiple jobs ($chosenjobs)?" 8 78); then
 		echo "scancel $chosenjobs"
@@ -40,7 +40,7 @@ function kill_multiple_jobs {
 }
 
 function tail_multiple_jobs {
-	TJOBS=$(for line in $(squeue -u $USER --format "'%A' '%j (%t, %M)' OFF" | sed '1d'); do echo "$line" | tr '\n' ' '; done)
+	TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
 	test=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
 	whiptail --title "Screens" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
 	eval "multiple_slurm_tails $test"
@@ -95,9 +95,15 @@ function single_job_tasks {
 			fi
 			;;
 		"q)")
-			green_text "Ok"
+			green_text "Ok, exiting"
 			;;
 	esac
+}
+
+function get_squeue_from_format_string {
+	for line in $(squeue -u $USER --format "$1" | sed '1d'); do 
+		echo "$line" | tr '\n' ' '; 
+	done
 }
 
 function slurminator {
@@ -125,13 +131,13 @@ function slurminator {
 	
 
 	if [[ $FAILED == 0 ]]; then
-		JOBS=$(for line in $(squeue -u $USER --format "'%A' '%j (%t, %M)'" | sed '1d'); do echo "$line" | tr '\n' ' '; done)
+		JOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)'")
 		chosenjob=$(
 			eval "whiptail --title 'Slurminator' --menu 'Welcome to Slurminator' $WIDTHHEIGHT $JOBS $SCANCELSTRING $TAILSTRING 'r)' 'reload slurminator' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3
 		)
 
 		if [[ $chosenjob == 'q)' ]]; then
-			green_text "Ok"
+			green_text "Ok, exiting"
 		elif [[ $chosenjob == 'r)' ]]; then
 			slurminator
 		elif [[ $chosenjob == 't)' ]]; then
