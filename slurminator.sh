@@ -59,6 +59,7 @@ function multiple_slurm_tails {
 			if [[ -e $THISSCREENCONFIGFILE ]]; then
 				debug_code "Screen file:"
 				cat $THISSCREENCONFIGFILE
+				debug_code "Screen file end"
 				screen -c $THISSCREENCONFIGFILE
 				rm $THISSCREENCONFIGFILE
 			else
