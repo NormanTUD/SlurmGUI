@@ -46,7 +46,6 @@ function kill_multiple_jobs {
 function tail_multiple_jobs {
 	TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
 	chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
-	chosenjobs=""
 	whiptail --title "Tail for multiple jobs with screen" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
 	if [[ $chosenjobs -eq "" ]]; then
 		green_text "No jobs chosen to tail"
