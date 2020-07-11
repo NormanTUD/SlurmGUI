@@ -188,7 +188,7 @@ function single_job_tasks {
 		"k)")
 			if (whiptail --title "Really kill >$jobname< ($chosenjob)?" --yesno "Are you sure you want to kill >$jobname< ($chosenjob)?" 8 78); then
 				debug_code "scancel $chosenjob"
-				scancel $chosenjob && green_text "$chosenjob killed" || red_text "Error killing $chosenjob"
+				scancel $chosenjob && green_text "$jobname ($chosenjob) killed" || red_text "Error killing $jobname ($chosenjob)"
 			fi
 			;;
 		"m)")
