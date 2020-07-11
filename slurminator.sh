@@ -177,8 +177,9 @@ function single_job_tasks {
 			slurmlogpath $chosenjob
 			;;
 		"t)")
-			debug_code "tail -f $(slurmlogpath $chosenjob)"
-			tail -f $(slurmlogpath $chosenjob)
+			chosenjobpath=$(slurmlogpath $chosenjob)
+			debug_code "tail -f $chosenjobpath"
+			tail -f $chosenjobpath
 			;;
 		"w)")
 			debug_code "whypending $chosenjob"
