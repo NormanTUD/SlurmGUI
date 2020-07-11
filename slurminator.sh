@@ -232,7 +232,7 @@ function show_accounting_data {
 
 	if [[ $FAILED == 0 ]]; then
 		whiptailoptions="'t)' 'Show accounting data as tree' 'o)' 'Show top user accounting' 'm)' 'Show top user accounting for this month'"
-		WIDTHHEIGHT="$LINES $COLUMNS $(( $LINES - 8 ))"
+		WIDTHHEIGHT="$LINES $COLUMNS $(( $LINES - 13 ))"
 		whattodo=$(eval "whiptail --title 'Accounting data' --menu 'Show accounting information' $WIDTHHEIGHT $whiptailoptions" 3>&2 2>&1 1>&3)
 		NUMBEROFLINES=$(( $LINES - 5 ))
 		case $whattodo in
