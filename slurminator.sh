@@ -4,12 +4,20 @@ function slurmlogpath {
 	scontrol show job $1 | grep StdOut | sed -e 's/^\s*StdOut=//'
 }
 
+echoerr() {
+	echo "$@" 1>&2
+}
+
 function red_text {
-    echo -e "\e[31m$1\e[0m"
+	echoerr -e "\e[31m$1\e[0m"
 }
 
 function green_text {
-    echo -e "\e[92m$1\e[0m"
+	echoerr -e "\e[92m$1\e[0m"
+}
+
+function debug_code {
+	echoerr -e "\e[93m$1\e[0m"
 }
 
 function multiple_slurm_tails {
@@ -37,7 +45,7 @@ function kill_multiple_jobs {
 		green_text "No jobs chosen to kill"
 	else
 		if (whiptail --title "Really kill multiple jobs ($chosenjobs)?" --yesno "Are you sure you want to kill multiple jobs ($chosenjobs)?" 8 78); then
-			echo "scancel $chosenjobs"
+			debug_code "scancel $chosenjobs"
 			eval "scancel $chosenjobs"
 		fi
 	fi
@@ -46,7 +54,6 @@ function kill_multiple_jobs {
 function tail_multiple_jobs {
 	TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
 	chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
-	#chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT '1' '1' ON $TJOBS" 3>&1 1>&2 2>&3)
 	whiptail --title "Tail for multiple jobs with screen" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
 	if [[ -z $chosenjobs ]]; then
 		green_text "No jobs chosen to tail"
@@ -79,20 +86,20 @@ function single_job_tasks {
 	whattodo=$(eval "whiptail --title 'Slurminator >$jobname< ($chosenjob)' --menu 'What to do with job >$jobname< ($chosenjob)' $WIDTHHEIGHT $whiptailoptions" 3>&2 2>&1 1>&3)
 	case $whattodo in
 		"s)")
-			echo "slurmlogpath $chosenjob"
+			debug_code "slurmlogpath $chosenjob"
 			slurmlogpath $chosenjob
 			;;
 		"t)")
-			echo "tail -f $(slurmlogpath $chosenjob)"
+			debug_code "tail -f $(slurmlogpath $chosenjob)"
 			tail -f $(slurmlogpath $chosenjob)
 			;;
 		"w)")
-			echo "whypending $chosenjob"
+			debug_code "whypending $chosenjob"
 			whypending $chosenjob
 			;;
 		"k)")
 			if (whiptail --title "Really kill >$jobname< ($chosenjob)?" --yesno "Are you sure you want to kill >$jobname< ($chosenjob)?" 8 78); then
-				echo "scancel $chosenjob"
+				debug_code "scancel $chosenjob"
 				scancel $chosenjob && green_text "$chosenjob killed" || red_text "Error killing $chosenjob"
 			fi
 			;;
@@ -101,7 +108,7 @@ function single_job_tasks {
 			;;
 		"c)")
 			if (whiptail --title "Really kill with USR1 >$jobname< ($chosenjob)?" --yesno "Are you sure you want to kill >$jobname< ($chosenjob) with USR1?" 8 78); then
-				echo "scancel --signal=USR1 --batch $chosenjob"
+				debug_code "scancel --signal=USR1 --batch $chosenjob"
 				scancel --signal=USR1 --batch $chosenjob && green_text "$chosenjob killed" || red_text "Error killing $chosenjob"
 			fi
 			;;
