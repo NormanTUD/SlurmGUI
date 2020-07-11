@@ -118,7 +118,7 @@ function get_squeue_from_format_string {
 	fi
 
 	if [[ $FAILED == 0 ]]; then
-		for line in $(squeue -u $USER --format "$1" | sed '1d'); do 
+		for line in $(squeue -u $USER --format $1 | sed '1d'); do 
 			echo "$line" | tr '\n' ' '; 
 		done
 	fi
