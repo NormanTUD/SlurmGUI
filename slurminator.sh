@@ -176,7 +176,6 @@ function single_job_tasks {
 		red_text "Tail does not seem to be installed, not showing 'tail -f' option"
 	fi
 
-	echo ">>>>>>>>>>>>>>> get_job_name $chosenjob"
 	jobname=$(get_job_name $chosenjob)
 	whiptailoptions="'s)' 'Show log path' $WHYPENDINGSTRING $TAILSTRING $SCANCELSTRING 'm)' 'go to main menu' 'q)' 'quit slurminator'"
 	whattodo=$(eval "whiptail --title 'Slurminator >$jobname< ($chosenjob)' --menu 'What to do with job $jobname ($chosenjob)' $WIDTHHEIGHT $whiptailoptions" 3>&2 2>&1 1>&3)
@@ -326,7 +325,7 @@ function slurminator {
 		elif [[ $chosenjob == 'a)' ]]; then
 			show_accounting_data
 		else
-			single_job_tasks $chosenjob || single_job_tasks $chosenjobs
+			{ single_job_tasks $chosenjob } || { single_job_tasks $chosenjobs }
 		fi
 	else
 		red_text  "Missing requirements, cannot run Slurminator"
