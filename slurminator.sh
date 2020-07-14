@@ -106,6 +106,12 @@ function kill_multiple_jobs {
 
 function tail_multiple_jobs {
 	FAILED=0
+	AUTOON=OFF
+
+	if [[ $1 == 'ON' ]]; then
+		AUTOON=ON
+	fi
+
 	if ! command -v squeue &> /dev/null; then
 		red_text "squeue not found. Cannot execute slurminator without it"
 		FAILED=1
@@ -127,8 +133,8 @@ function tail_multiple_jobs {
 	fi
 
 	if [[ $FAILED == 0 ]]; then
-		TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
-		chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
+		TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' $AUTOON")
+		chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --checklist 'Which jobs to choose for tail?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
 		if [[ -z $chosenjobs ]]; then
 			green_text "No jobs chosen to tail"
 		else
@@ -163,7 +169,7 @@ function single_job_tasks {
 
 	TAILSTRING=""
 	if command -v tail &> /dev/null; then
-		TAILSTRING="'t)' 'tail -f'"
+		TAILSTRING="'t)' 'tail -f' 'o)' 'tail -f (all enabled by default)'"
 	else
 		red_text "Tail does not seem to be installed, not showing 'tail -f' option"
 	fi
@@ -307,6 +313,8 @@ function slurminator {
 			slurminator
 		elif [[ $chosenjob == 't)' ]]; then
 			tail_multiple_jobs
+		elif [[ $chosenjob == 'o)' ]]; then
+			tail_multiple_jobs t
 		elif [[ $chosenjob == 'k)' ]]; then
 			kill_multiple_jobs
 		elif [[ $chosenjob == 'a)' ]]; then
