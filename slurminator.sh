@@ -148,6 +148,7 @@ function tail_multiple_jobs {
 
 function single_job_tasks {
 	chosenjob=$1
+	gobacktoslurminator="$2"
 
 	if ! command -v scontrol &> /dev/null; then
 		red_text "scontrol not found. Cannot execute slurminator without it"
@@ -197,7 +198,6 @@ function single_job_tasks {
 			if (whiptail --title "Really kill >$jobname< ($chosenjob)?" --yesno "Are you sure you want to kill >$jobname< ($chosenjob)?" 8 78); then
 				debug_code "scancel $chosenjob"
 				scancel $chosenjob && green_text "$jobname ($chosenjob) killed" || red_text "Error killing $jobname ($chosenjob)"
-				return 0
 			fi
 			;;
 		"m)")
@@ -211,10 +211,12 @@ function single_job_tasks {
 			;;
 		"q)")
 			green_text "Ok, exiting"
-			return 0
 			;;
 	esac
-	return 1
+
+	if [[ $gobacktoslurminator -eq '1' ]]; then
+		slurminator
+	fi
 }
 
 function get_squeue_from_format_string {
@@ -325,7 +327,7 @@ function slurminator {
 		elif [[ $chosenjob == 'a)' ]]; then
 			show_accounting_data
 		else
-			( single_job_tasks $chosenjob ) || ( single_job_tasks $chosenjobs )
+			single_job_tasks $chosenjob 1
 		fi
 	else
 		red_text  "Missing requirements, cannot run Slurminator"
