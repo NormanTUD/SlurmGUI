@@ -325,7 +325,7 @@ function slurminator {
 		elif [[ $chosenjob == 'a)' ]]; then
 			show_accounting_data
 		else
-			single_job_tasks $chosenjob || single_job_tasks
+			single_job_tasks $chosenjob || single_job_tasks $chosenjobs
 		fi
 	else
 		red_text  "Missing requirements, cannot run Slurminator"
