@@ -232,6 +232,16 @@ function get_squeue_from_format_string {
 	fi
 }
 
+function run_last_sbatch_or_srun {
+	history_stuff=$(history 0 | sed -e 's/^\s*[0-9]*\s*//' | egrep "^(sbatch|srun)" | sed -e 's/"/\\"/' | grep -v grep | awk '!x[$0]++' | tail -n $(($LINES - 10)) | awk '{printf("\"%03d\" \"%s\"\n", NR, $0)}')
+	thistory=$(echo $history_stuff | tr '\n' ' ')
+	if [[ $thistory -eq "" ]]; then
+		red_text "No history stuff found"
+	else
+		chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --radiolist 'Which jobs to choose for tail?' $WIDTHHEIGHT $thistory" 3>&1 1>&2 2>&3)
+	fi
+}
+
 function show_accounting_data {
 	FAILED=0
 	if ! command -v sreport &> /dev/null; then
