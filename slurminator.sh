@@ -305,7 +305,6 @@ function slurminator {
 	else
 		red_text "Tail does not seem to be installed, not showing 'tail multiple jobs'"
 	fi
-	
 
 	if [[ $FAILED == 0 ]]; then
 		WIDTHHEIGHT="$LINES $COLUMNS $(( $LINES - 8 ))"
