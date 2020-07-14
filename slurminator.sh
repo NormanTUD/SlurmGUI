@@ -169,7 +169,7 @@ function single_job_tasks {
 
 	TAILSTRING=""
 	if command -v tail &> /dev/null; then
-		TAILSTRING="'t)' 'tail -f' 'o)' 'tail -f (all enabled by default)'"
+		TAILSTRING="'t)' 'tail -f'"
 	else
 		red_text "Tail does not seem to be installed, not showing 'tail -f' option"
 	fi
@@ -291,7 +291,7 @@ function slurminator {
 	TAILSTRING=""
 	if command -v tail &> /dev/null; then
 		if command -v screen &> /dev/null; then
-			TAILSTRING="'t)' 'tail multiple jobs'"
+			TAILSTRING="'t)' 'tail multiple jobs' 'e)' 'tail multiple jobs (all enabled by default)'"
 		else
 			red_text "Screen could not be found, not showing 'tail multiple jobs' option"
 		fi
@@ -313,8 +313,8 @@ function slurminator {
 			slurminator
 		elif [[ $chosenjob == 't)' ]]; then
 			tail_multiple_jobs
-		elif [[ $chosenjob == 'o)' ]]; then
-			tail_multiple_jobs t
+		elif [[ $chosenjob == 'e)' ]]; then
+			tail_multiple_jobs ON
 		elif [[ $chosenjob == 'k)' ]]; then
 			kill_multiple_jobs
 		elif [[ $chosenjob == 'a)' ]]; then
