@@ -99,9 +99,11 @@ function kill_multiple_jobs {
 			if (whiptail --title "Really kill multiple jobs ($chosenjobs)?" --yesno "Are you sure you want to kill multiple jobs ($chosenjobs)?" 8 78); then
 				debug_code "scancel $chosenjobs"
 				eval "scancel $chosenjobs"
+				return 0
 			fi
 		fi
 	fi
+	return 1
 }
 
 function tail_multiple_jobs {
@@ -316,7 +318,7 @@ function slurminator {
 		elif [[ $chosenjob == 'e)' ]]; then
 			tail_multiple_jobs ON
 		elif [[ $chosenjob == 'k)' ]]; then
-			kill_multiple_jobs
+			kill_multiple_jobs || slurminator
 		elif [[ $chosenjob == 'a)' ]]; then
 			show_accounting_data
 		else
