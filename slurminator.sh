@@ -178,7 +178,8 @@ function single_job_tasks {
 
 	jobname=$(get_job_name $chosenjob)
 	whiptailoptions="'s)' 'Show log path' $WHYPENDINGSTRING $TAILSTRING $SCANCELSTRING 'm)' 'go to main menu' 'q)' 'quit slurminator'"
-	whattodo=$(eval "whiptail --title 'Slurminator >$jobname< ($chosenjob)' --menu 'What to do with job \"$jobname\" ($chosenjob)' $WIDTHHEIGHT $whiptailoptions" 3>&2 2>&1 1>&3)
+	echo "whiptail --title 'Slurminator >$jobname< ($chosenjob)' --menu 'What to do with job $jobname ($chosenjob)' $WIDTHHEIGHT $whiptailoptions"
+	whattodo=$(eval "whiptail --title 'Slurminator >$jobname< ($chosenjob)' --menu 'What to do with job $jobname ($chosenjob)' $WIDTHHEIGHT $whiptailoptions" 3>&2 2>&1 1>&3)
 	case $whattodo in
 		"s)")
 			debug_code "slurmlogpath $chosenjob"
