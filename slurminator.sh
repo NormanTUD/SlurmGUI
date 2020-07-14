@@ -211,6 +211,7 @@ function single_job_tasks {
 			;;
 		"q)")
 			green_text "Ok, exiting"
+			return 0
 			;;
 	esac
 	return 1
@@ -324,7 +325,7 @@ function slurminator {
 		elif [[ $chosenjob == 'a)' ]]; then
 			show_accounting_data
 		else
-			single_job_tasks $chosenjob || slurminator
+			single_job_tasks $chosenjob || single_job_tasks
 		fi
 	else
 		red_text  "Missing requirements, cannot run Slurminator"
