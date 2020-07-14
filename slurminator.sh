@@ -197,6 +197,7 @@ function single_job_tasks {
 			if (whiptail --title "Really kill >$jobname< ($chosenjob)?" --yesno "Are you sure you want to kill >$jobname< ($chosenjob)?" 8 78); then
 				debug_code "scancel $chosenjob"
 				scancel $chosenjob && green_text "$jobname ($chosenjob) killed" || red_text "Error killing $jobname ($chosenjob)"
+				return 0
 			fi
 			;;
 		"m)")
@@ -212,6 +213,7 @@ function single_job_tasks {
 			green_text "Ok, exiting"
 			;;
 	esac
+	return 1
 }
 
 function get_squeue_from_format_string {
@@ -322,7 +324,7 @@ function slurminator {
 		elif [[ $chosenjob == 'a)' ]]; then
 			show_accounting_data
 		else
-			single_job_tasks $chosenjob
+			single_job_tasks $chosenjob || slurminator
 		fi
 	else
 		red_text  "Missing requirements, cannot run Slurminator"
