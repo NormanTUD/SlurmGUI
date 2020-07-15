@@ -279,7 +279,7 @@ function show_workspace_options_single_job {
 
 	EXTENDSTRING=""
 	if command -v ws_extend &> /dev/null; then
-		EXTENDSTRING="'e)' 'extend workspace'"
+		EXTENDSTRING="'e)' 'extend workspace 90 days' 'j)' 'extend workspace custom number of days'"
 	fi
 
 	RELEASESTRING=""
@@ -294,6 +294,17 @@ function show_workspace_options_single_job {
 			filesystem=$(get_filesystem_workspace $ws)
 			debug_code "ws_extend -F $filesystem $ws 90"
 			ws_extend -F $filesystem $ws 90
+			;;
+		"j)")
+			filesystem=$(get_filesystem_workspace $ws)
+			days=$(whiptail --inputbox "How many days to extend workspace?" 8 78 Blue --title "Please enter a number of days" 3>&1 1>&2 2>&3)
+			re='^[0-9]+$'
+			if ! [[ $days =~ $re ]] ; then
+				red_text "error: Not a number"
+			else
+				debug_code "ws_extend -F $filesystem $ws $days"
+				ws_extend -F $filesystem $ws $days
+			fi
 			;;
 		"r)")
 			if (whiptail --title "Are you sure you want to release $ws?" --yesno "Are you sure you want to release workspace $ws?" 8 78); then
