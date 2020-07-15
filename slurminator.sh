@@ -111,7 +111,7 @@ function kill_multiple_jobs {
 			green_text "No jobs chosen to kill"
 		else
 			NEWT_COLORS=$(warningcolors)
-			if (whiptail --title "Really kill multiple jobs ($chosenjobs)?" --yesno "Are you sure you want to kill multiple jobs ($chosenjobs)?" 8 78); then
+			if (whiptail --title "Really kill multiple jobs ($chosenjobs)?" --yesno --defaultno "Are you sure you want to kill multiple jobs ($chosenjobs)?" 8 78); then
 				debug_code "scancel $chosenjobs"
 				eval "scancel $chosenjobs"
 				return 0
@@ -212,7 +212,7 @@ function single_job_tasks {
 			;;
 		"k)")
 			NEWT_COLORS=$(warningcolors)
-			if (whiptail --title "Really kill >$jobname< ($chosenjob)?" --yesno "Are you sure you want to kill >$jobname< ($chosenjob)?" 8 78); then
+			if (whiptail --title "Really kill >$jobname< ($chosenjob)?" --yesno --defaultno "Are you sure you want to kill >$jobname< ($chosenjob)?" 8 78); then
 				debug_code "scancel $chosenjob"
 				scancel $chosenjob && green_text "$jobname ($chosenjob) killed" || red_text "Error killing $jobname ($chosenjob)"
 			fi
@@ -223,7 +223,7 @@ function single_job_tasks {
 			;;
 		"c)")
 			NEWT_COLORS=$(warningcolors)
-			if (whiptail --title "Really kill with USR1 >$jobname< ($chosenjob)?" --yesno "Are you sure you want to kill >$jobname< ($chosenjob) with USR1?" 8 78); then
+			if (whiptail --title "Really kill with USR1 >$jobname< ($chosenjob)?" --yesno --defaultno "Are you sure you want to kill >$jobname< ($chosenjob) with USR1?" 8 78); then
 				debug_code "scancel --signal=USR1 --batch $chosenjob"
 				scancel --signal=USR1 --batch $chosenjob && green_text "$chosenjob killed" || red_text "Error killing $chosenjob"
 			fi
@@ -323,7 +323,7 @@ function show_workspace_options_single_job {
 			;;
 		"r)")
 			NEWT_COLORS=$(warningcolors)
-			if (whiptail --title "Are you sure you want to release $ws?" --yesno "Are you sure you want to release workspace $ws?" 8 78); then
+			if (whiptail --title "Are you sure you want to release $ws?" --yesno --defaultno "Are you sure you want to release workspace $ws?" 8 78); then
 				debug_code "ws_release $ws"
 				ws_release $ws
 			fi
