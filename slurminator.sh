@@ -87,6 +87,44 @@ function multiple_slurm_tails {
 	fi
 }
 
+
+
+function kill_multiple_jobs_usrsignal {
+	FAILED=0
+	if ! command -v squeue &> /dev/null; then
+		red_text "squeue not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v scancel &> /dev/null; then
+		red_text "scancel not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v whiptail &> /dev/null; then
+		red_text "whiptail not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if [[ $FAILED == 0 ]]; then
+		TJOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)' OFF")
+		chosenjobs=$(eval "whiptail --title 'Which jobs to kill with USR1?' --checklist 'Which jobs to choose USR1?' $WIDTHHEIGHT $TJOBS" 3>&1 1>&2 2>&3)
+		if [[ -z $chosenjobs ]]; then
+			green_text "No jobs chosen to kill"
+		else
+			NEWT_COLORS=$(warningcolors)
+			if (whiptail --title "Really kill multiple jobs ($chosenjobs)?" --yesno --defaultno --fullbuttons "Are you sure you want to kill multiple jobs ($chosenjobs)?" 8 78); then
+				debug_code "scancel --signal=USR1 --batch $chosenjobs"
+				eval "scancel --signal=USR1 --batch $chosenjobs"
+				NEWT_COLORS=''
+				return 0
+			fi
+			NEWT_COLORS=''
+		fi
+	fi
+	return 1
+}
+
 function kill_multiple_jobs {
 	FAILED=0
 	if ! command -v squeue &> /dev/null; then
@@ -409,7 +447,7 @@ function slurminator {
 
 	SCANCELSTRING=""
 	if command -v scancel &> /dev/null; then
-		SCANCELSTRING="'k)' 'kill multiple jobs'"
+		SCANCELSTRING="'k)' 'kill multiple jobs' 'n)' 'kill multiple jobs with USR1'"
 	fi
 
 	ACCOUNTINGSTRING=""
@@ -452,6 +490,8 @@ function slurminator {
 			tail_multiple_jobs
 		elif [[ $chosenjob == 'e)' ]]; then
 			tail_multiple_jobs ON
+		elif [[ $chosenjob == 'n)' ]]; then
+			kill_multiple_jobs_usrsignal || slurminator
 		elif [[ $chosenjob == 'k)' ]]; then
 			kill_multiple_jobs || slurminator
 		elif [[ $chosenjob == 'a)' ]]; then
