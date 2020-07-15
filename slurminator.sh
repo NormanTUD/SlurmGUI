@@ -296,8 +296,10 @@ function show_workspace_options_single_job {
 			ws_extend -F $filesystem $ws 90
 			;;
 		"r)")
-			debug_code "ws_release $ws"
-			ws_release $ws
+			if (whiptail --title "Are you sure you want to release $ws?" --yesno "Are you sure you want to release workspace $ws?" 8 78); then
+				debug_code "ws_release $ws"
+				ws_release $ws
+			fi
 			;;
 		"m)")
 			show_workspace_options
