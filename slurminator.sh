@@ -145,7 +145,7 @@ function tail_multiple_jobs {
 		if [[ -z $chosenjobs ]]; then
 			green_text "No jobs chosen to tail"
 		else
-			whiptail --title "Tail for multiple jobs with screen" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
+			#whiptail --title "Tail for multiple jobs with screen" --msgbox "To exit, press <CTRL> <a>, then <\\>" 8 78 3>&1 1>&2 2>&3
 			eval "multiple_slurm_tails $chosenjobs"
 		fi
 	fi
