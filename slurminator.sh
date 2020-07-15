@@ -232,16 +232,6 @@ function get_squeue_from_format_string {
 	fi
 }
 
-function run_last_sbatch_or_srun {
-	history_stuff=$(history 0 | sed -e 's/^\s*[0-9]*\s*//' | egrep "^(sbatch|srun)" | sed -e 's/"/\\"/' | grep -v grep | awk '!x[$0]++' | tail -n $(($LINES - 10)) | awk '{printf("\"%03d\" \"%s\"\n", NR, $0)}')
-	thistory=$(echo $history_stuff | tr '\n' ' ')
-	if [[ $thistory -eq "" ]]; then
-		red_text "No history stuff found"
-	else
-		chosenjobs=$(eval "whiptail --title 'Which jobs to tail?' --radiolist 'Which jobs to choose for tail?' $WIDTHHEIGHT $thistory" 3>&1 1>&2 2>&3)
-	fi
-}
-
 function show_accounting_data {
 	FAILED=0
 	if ! command -v sreport &> /dev/null; then
@@ -275,6 +265,40 @@ function show_accounting_data {
 		esac
 	else
 		red_text "Missing requirements, cannot run show_accounting_data"
+	fi
+}
+
+function show_workspace_options {
+	FAILED=0
+	if ! command -v whiptail &> /dev/null; then
+		red_text "whiptail not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v ws_list &> /dev/null; then
+		red_text "ws_list not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v ws_allocate &> /dev/null; then
+		red_text "ws_allocate not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v ws_extend &> /dev/null; then
+		red_text "ws_extend not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+
+	if ! command -v ws_release &> /dev/null; then
+		red_text "ws_release not found. Cannot execute slurminator without it"
+		FAILED=1
+	fi
+	if [[ $FAILED == 0 ]]; then
+		existingworkspaces=$(ws_list | perl -e 'my %struct = (); my $current_id = q##; while (<>) { if(m#^id: (.*)$#) { $current_id = $1 } elsif (m#remaining time\s*:\s*(.*)?$#) { $struct{$current_id} = $1 } }; foreach my $key (keys %struct) { print qq#"$key" "$struct{$key}"# }')
+		chosenjobs=$(eval "whiptail --title 'Which workspaces to do something with?' --checklist 'Which jobs to choose for tail?' $WIDTHHEIGHT $existingworkspaces" 3>&1 1>&2 2>&3)
+	else
+		red_text "Cannot run show_workspace_options because of missing programs"
 	fi
 }
 
@@ -316,11 +340,20 @@ function slurminator {
 		red_text "Tail does not seem to be installed, not showing 'tail multiple jobs'"
 	fi
 
+	WORKSPACESSTRING=""
+	if command -v ws_list &> /dev/null; then
+		TAILSTRING="'w)' 'show options for workspaces'"
+	else
+		red_text "ws_list does not seem to be installed"
+	fi
+
+	FULLOPTIONSTRING="$JOBS $SCANCELSTRING $TAILSTRING $ACCOUNTINGSTRING $WORKSPACESSTRING"
+
 	if [[ $FAILED == 0 ]]; then
 		WIDTHHEIGHT="$LINES $COLUMNS $(( $LINES - 8 ))"
 		JOBS=$(get_squeue_from_format_string "'%A' '%j (%t, %M)'")
 		chosenjob=$(
-			eval "whiptail --title 'Slurminator' --menu 'Welcome to Slurminator' $WIDTHHEIGHT $JOBS $SCANCELSTRING $TAILSTRING $ACCOUNTINGSTRING 'r)' 'reload slurminator' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3
+			eval "whiptail --title 'Slurminator' --menu 'Welcome to Slurminator' $WIDTHHEIGHT $FULLOPTIONSTRING 'r)' 'reload slurminator' 'q)' 'quit slurminator'" 3>&2 2>&1 1>&3
 		)
 
 		if [[ $chosenjob == 'q)' ]]; then
@@ -335,6 +368,8 @@ function slurminator {
 			kill_multiple_jobs || slurminator
 		elif [[ $chosenjob == 'a)' ]]; then
 			show_accounting_data
+		elif [[ $chosenjob == 'w)' ]]; then
+			show_workspace_options
 		else
 			single_job_tasks $chosenjob 1
 		fi
