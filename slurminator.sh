@@ -298,7 +298,8 @@ function show_workspace_options_single_job {
 		"r)")
 			if (whiptail --title "Are you sure you want to release $ws?" --yesno "Are you sure you want to release workspace $ws?" 8 78); then
 				debug_code "ws_release $ws"
-				ws_release $ws
+				echo "NOT REALLY RELEASING YET"
+				#ws_release $ws
 			fi
 			;;
 		"m)")
