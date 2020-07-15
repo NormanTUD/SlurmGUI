@@ -114,6 +114,7 @@ function kill_multiple_jobs {
 			if (whiptail --title "Really kill multiple jobs ($chosenjobs)?" --yesno --defaultno --fullbuttons "Are you sure you want to kill multiple jobs ($chosenjobs)?" 8 78); then
 				debug_code "scancel $chosenjobs"
 				eval "scancel $chosenjobs"
+				NEWT_COLORS=''
 				return 0
 			fi
 			NEWT_COLORS=''
@@ -388,6 +389,9 @@ function show_workspace_options {
 
 function slurminator {
 	FAILED=0
+
+	NEWT_COLORS=""
+
 	if ! command -v squeue &> /dev/null; then
 		red_text "squeue not found. Cannot execute slurminator without it"
 		FAILED=1
