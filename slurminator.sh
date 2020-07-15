@@ -409,7 +409,7 @@ function slurminator {
 
 	WORKSPACESSTRING=""
 	if command -v ws_list &> /dev/null; then
-		TAILSTRING="'w)' 'show options for workspaces'"
+		WORKSPACESSTRING="'w)' 'show options for workspaces'"
 	else
 		red_text "ws_list does not seem to be installed"
 	fi
