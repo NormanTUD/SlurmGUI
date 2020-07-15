@@ -317,6 +317,7 @@ function show_workspace_options_single_job {
 			;;
 		"q)")
 			green_text "Ok, exiting"
+			gobacktomain=0
 			;;
 	esac
 
