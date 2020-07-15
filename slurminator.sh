@@ -300,7 +300,7 @@ function show_workspace_options_single_job {
 			ws_release $ws
 			;;
 		"m)")
-			slurminator
+			show_workspace_options
 			;;
 		"q)")
 			green_text "Ok, exiting"
