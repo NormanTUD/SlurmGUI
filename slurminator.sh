@@ -16,6 +16,11 @@ function debug_code {
 	echoerr -e "\e[93m$1\e[0m"
 }
 
+function get_filesystem_workspace {
+	ws=$1
+	ws_list | perl -e 'my %struct = (); my $current_id = q##; while (<>) { if(m#^id: (.*)$#) { $current_id = $1 } elsif (m#filesystem\s*name\s*:\s*(.*)?$#) { $struct{$current_id} = $1 } }; foreach my $key (keys %struct) { print "$key--->$struct{$key}\n" }' | grep "^$ws--->" | sed -e "s/^$ws--->//"
+}
+
 function slurmlogpath {
 	if command -v scontrol &> /dev/null; then
 		if command -v grep &> /dev/null; then
@@ -268,6 +273,45 @@ function show_accounting_data {
 	fi
 }
 
+function show_workspace_options_single_job {
+	ws=$1
+	gobacktomain="$2"
+
+	EXTENDSTRING=""
+	if command -v ws_extend &> /dev/null; then
+		EXTENDSTRING="'e)' 'extend workspace'"
+	fi
+
+	RELEASESTRING=""
+	if command -v ws_release &> /dev/null; then
+		SCANCELSTRING="'r)' 'release workspace'"
+	fi
+
+	whiptailoptions="$EXTENDSTRING $RELEASESTRING 'm)' 'go to main menu' 'q)' 'quit slurminator'"
+	whattodo=$(eval "whiptail --title 'Slurminator workspace $ws' --menu 'What to do with workspace $ws' $WIDTHHEIGHT $whiptailoptions" 3>&2 2>&1 1>&3)
+	case $whattodo in
+		"e)")
+			filesystem=$(get_filesystem_workspace $ws)
+			debug_code "ws_extend -F $filesystem $ws 90"
+			ws_extend -F $filesystem $ws 90
+			;;
+		"r)")
+			debug_code "ws_release $ws"
+			ws_release $ws
+			;;
+		"m)")
+			slurminator
+			;;
+		"q)")
+			green_text "Ok, exiting"
+			;;
+	esac
+
+	if [[ $gobacktomain -eq '1' ]]; then
+		show_workspace_options
+	fi
+}
+
 function show_workspace_options {
 	FAILED=0
 	if ! command -v whiptail &> /dev/null; then
@@ -300,7 +344,7 @@ function show_workspace_options {
 		if [[ $chosenjob == 'm)' ]]; then
 			slurminator
 		else
-			echo $chosenjob
+			show_workspace_options_single_job $chosenjob 1
 		fi
 	else
 		red_text "Cannot run show_workspace_options because of missing programs"
