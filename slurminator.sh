@@ -296,7 +296,8 @@ function show_workspace_options {
 	fi
 	if [[ $FAILED == 0 ]]; then
 		existingworkspaces=$(ws_list | perl -e 'my %struct = (); my $current_id = q##; while (<>) { if(m#^id: (.*)$#) { $current_id = $1 } elsif (m#remaining time\s*:\s*(.*)?$#) { $struct{$current_id} = $1 } }; foreach my $key (keys %struct) { print qq#"$key" "$struct{$key}"# }')
-		chosenjobs=$(eval "whiptail --title 'Which workspaces to do something with?' --checklist 'Which jobs to choose for tail?' $WIDTHHEIGHT $existingworkspaces" 3>&1 1>&2 2>&3)
+		echo "whiptail --title 'Which workspaces to do something with?' --checklist 'Which workspace?' $WIDTHHEIGHT $existingworkspaces"
+		chosenjobs=$(eval "whiptail --title 'Which workspaces to do something with?' --checklist 'Which workspace?' $WIDTHHEIGHT $existingworkspaces" 3>&1 1>&2 2>&3)
 	else
 		red_text "Cannot run show_workspace_options because of missing programs"
 	fi
