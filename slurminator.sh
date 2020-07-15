@@ -295,7 +295,7 @@ function show_workspace_options_single_job {
 
 	EXTENDSTRING=""
 	if command -v ws_extend &> /dev/null; then
-		EXTENDSTRING="'e)' 'extend workspace 90 days' 'j)' 'extend workspace custom number of days'"
+		EXTENDSTRING="'e)' 'extend workspace 100 days' 'j)' 'extend workspace custom number of days'"
 	fi
 
 	RELEASESTRING=""
@@ -308,8 +308,8 @@ function show_workspace_options_single_job {
 	case $whattodo in
 		"e)")
 			filesystem=$(get_filesystem_workspace $ws)
-			debug_code "ws_extend -F $filesystem $ws 90"
-			ws_extend -F $filesystem $ws 90
+			debug_code "ws_extend -F $filesystem $ws 100"
+			ws_extend -F $filesystem $ws 100
 			;;
 		"j)")
 			filesystem=$(get_filesystem_workspace $ws)
