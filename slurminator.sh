@@ -297,7 +297,7 @@ function show_workspace_options_single_job {
 			;;
 		"j)")
 			filesystem=$(get_filesystem_workspace $ws)
-			days=$(whiptail --inputbox "How many days to extend workspace?" 8 78 Blue --title "Please enter a number of days" 3>&1 1>&2 2>&3)
+			days=$(whiptail --inputbox "How many days to extend workspace?" 8 78 90 --title "Please enter a number of days" 3>&1 1>&2 2>&3)
 			re='^[0-9]+$'
 			if ! [[ $days =~ $re ]] ; then
 				red_text "error: Not a number"
