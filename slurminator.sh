@@ -284,7 +284,7 @@ function show_workspace_options_single_job {
 
 	RELEASESTRING=""
 	if command -v ws_release &> /dev/null; then
-		SCANCELSTRING="'r)' 'release workspace'"
+		RELEASESTRING="'r)' 'release workspace'"
 	fi
 
 	whiptailoptions="$EXTENDSTRING $RELEASESTRING 'm)' 'go to main menu' 'q)' 'quit slurminator'"
