@@ -343,7 +343,7 @@ function show_workspace_options {
 		chosenjob=$(eval "whiptail --title 'Which workspaces to do something with?' --menu 'Which workspace?' $WIDTHHEIGHT $existingworkspaces 'm)' 'go to main menu' 'q)' 'quit slurminator'" 3>&1 1>&2 2>&3)
 		if [[ $chosenjob == 'm)' ]]; then
 			slurminator
-		if [[ $chosenjob == 'q)' ]]; then
+		elif [[ $chosenjob == 'q)' ]]; then
 			green_text "Ok, exiting"
 		else
 			show_workspace_options_single_job $chosenjob 1
