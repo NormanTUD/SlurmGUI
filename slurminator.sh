@@ -73,7 +73,7 @@ function run_commands_in_parallel {
 				echo $THISSCREENCONFIGFILE
 				cat $THISSCREENCONFIGFILE
 				screen -c $THISSCREENCONFIGFILE
-				#rm $THISSCREENCONFIGFILE
+				rm $THISSCREENCONFIGFILE
 			else
 				echo "$THISSCREENCONFIGFILE not found"
 			fi
