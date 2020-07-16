@@ -63,7 +63,7 @@ function multiple_slurm_tails {
 				logfile=$(slurmlogpath $slurmid)
 				if [[ -e $logfile ]]; then
 					echo "screen tail -f $logfile" >> $THISSCREENCONFIGFILE
-					echo "sessionname '$(get_job_name $slurmid) ($slurmid)'" >> $THISSCREENCONFIGFILE
+					echo "title '$(get_job_name $slurmid) ($slurmid)'" >> $THISSCREENCONFIGFILE
 					if [[ ${*: -1:1} -ne $slurmid ]]; then
 						echo "split -v" >> $THISSCREENCONFIGFILE
 						echo "focus right" >> $THISSCREENCONFIGFILE
