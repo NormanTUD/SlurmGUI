@@ -55,6 +55,36 @@ function get_job_name {
 	fi
 }
 
+function run_commands_in_parallel {
+	args=$#
+	if command -v screen &> /dev/null; then
+		if command -v uuidgen &> /dev/null; then
+			THISSCREENCONFIGFILE=/tmp/$(uuidgen).conf
+			for (( i=1; i<=$args; i+=1 )); do
+				thiscommand=${@:$i:1}
+				echo "screen $thiscommand" >> $THISSCREENCONFIGFILE
+				echo "title '$thiscommand'" >> $THISSCREENCONFIGFILE
+				if [[ $i -ne $args ]]; then
+					echo "split -v" >> $THISSCREENCONFIGFILE
+					echo "focus right" >> $THISSCREENCONFIGFILE
+				fi
+			done
+			if [[ -e $THISSCREENCONFIGFILE ]]; then
+				echo $THISSCREENCONFIGFILE
+				cat $THISSCREENCONFIGFILE
+				screen -c $THISSCREENCONFIGFILE
+				#rm $THISSCREENCONFIGFILE
+			else
+				echo "$THISSCREENCONFIGFILE not found"
+			fi
+		else
+			echo "Command uuidgen not found, cannot execute run_commands_in_parallel"
+		fi
+	else
+		echo "Command screen not found, cannot execute run_commands_in_parallel"
+	fi
+}
+
 function multiple_slurm_tails {
 	if command -v screen &> /dev/null; then
 		if command -v uuidgen &> /dev/null; then
